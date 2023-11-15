@@ -11,6 +11,7 @@ using UnityEngine;
 using VarianceAPI;
 using VarianceAPI.Components;
 using VarianceAPI.ScriptableObjects;
+using System.Reflection;
 
 namespace Wonda
 {
@@ -557,7 +558,7 @@ namespace Wonda
                 Interactor interactor = player.GetBody().GetComponent<Interactor>();
 
                 // Getting the player's model size and using that to base the selection size off of.
-                Vector3 vec = Vector3.Scale(player.GetBody().modelLocator.modelTransform.GetComponent<CharacterModel>().mainSkinnedMeshRenderer.bounds.size, player.GetBody().modelLocator.transform.localScale);
+                Vector3 vec = Vector3.Scale(player.GetBody().modelLocator.modelTransform.GetComponent<SkinnedMeshRenderer>().bounds.size, player.GetBody().modelLocator.transform.localScale);
                 float var = Mathf.Max(Mathf.Max(vec.x, vec.y), vec.z);
                 interactor.maxInteractionDistance = var;
 
@@ -719,6 +720,7 @@ namespace Wonda
         }
 
         // Updating the *other* whitelist.
+
         private void UpdateEliteWhitelist()
         {
             Logger.LogInfo("Updating the Elite whitelist.");
@@ -730,11 +732,14 @@ namespace Wonda
             currEliteWhitelist.Clear();
 
             // Grabbing our reference to EliteTiers
-            CombatDirector.EliteTierDef[] refDef = CombatDirector.eliteTiers;
+
+            var tiersField = typeof(CombatDirector).GetField("eliteTiers", BindingFlags.Static | BindingFlags.NonPublic);
+            var refDef = (CombatDirector.EliteTierDef[])tiersField.GetValue(null);
+            //eliteTiers is private Static
+            //CombatDirector.EliteTierDef[] refDef = CombatDirector.eliteTiers;
 
             // A final lil' check to see if our EliteTiers are null.
-            if(refDef == null || refDef.Length <= 0) return;
-
+            if (refDef == null || refDef.Length <= 0) return;
             // The big bad loop. First iterating over all the main tiers.
             for (var i = 0; i < refDef.Length; i++)
             {
