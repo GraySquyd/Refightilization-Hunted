@@ -12,6 +12,7 @@ using VarianceAPI;
 using VarianceAPI.Components;
 using VarianceAPI.ScriptableObjects;
 using System.Reflection;
+using BepInEx.Configuration;
 
 namespace Wonda
 {
@@ -60,6 +61,12 @@ namespace Wonda
             public float lastDamagedTime = 0;
         }
 
+        public static ConfigEntry<bool>
+            OverridePlayerScalingEnabled,
+            OverrideBossLootScalingEnabled,
+            MoneyScalarEnabled;
+        public static ConfigEntry<double> MoneyScalar;
+
         // The actual class to use.
         public List<PlayerStorage> playerStorage = new List<PlayerStorage>();
 
@@ -84,6 +91,7 @@ namespace Wonda
             SetupHooks();
             respawnMethodCheck.AddRange(_config.PreventPrefabResetMethods);
             Logger.LogInfo("Loaded Refightilization!");
+            On.RoR2.Networking.NetworkManagerSystemSteam.OnClientConnect += (s, u, t) => { };
         }
 
         public void Start()
@@ -125,9 +133,76 @@ namespace Wonda
             moonDisabled = false; // Moonless
         }
 
+        // MoneyScalarEnabled
+        [ConCommand(commandName = "ss_MoneyScalarEnabled", flags = ConVarFlags.None,
+            helpText = "Modifies whether the money scalar is enabled.")]
+        private static void CcMoneyScalarEnabled(ConCommandArgs args)
+        {
+            if (args.Count == 0)
+            {
+                //UnityEngine.Debug.Log();
+                return;
+            }
+
+            var valid = TryGetBool(args[0]);
+            if (!valid.HasValue)
+                UnityEngine.Debug.Log("Couldn't parse to boolean.");
+            else
+            {
+                MoneyScalarEnabled.Value = valid.Value;
+                UnityEngine.Debug.Log($"Money sharing scalar status set to {MoneyScalarEnabled.Value}.");
+            }
+        }
+
+        // MoneyScalar
+        [ConCommand(commandName = "ss_MoneyScalar", flags = ConVarFlags.None,
+            helpText = "Modifies percent of gold earned when money sharing is on.")]
+        private static void CcMoneyScalar(ConCommandArgs args)
+        {
+            if (args.Count == 0)
+            {
+                UnityEngine.Debug.Log(MoneyScalar.Value);
+                return;
+            }
+
+            var valid = args.TryGetArgDouble(0);
+            if (!valid.HasValue)
+            
+            UnityEngine.Debug.Log("Couldn't parse to a number.");
+            else
+            {
+                MoneyScalar.Value = valid.Value;
+                UnityEngine.Debug.Log($"Mod status set to {MoneyScalar.Value}.");
+            }
+        }
+
+
+
+        // DisableBossLootScaling
+        [ConCommand(commandName = "ss_OverrideBossLootScaling", flags = ConVarFlags.None,
+            helpText = "Modifies whether boss loot should scale based on player count.")]
+        private static void CcBossLoot(ConCommandArgs args)
+        {
+            if (args.Count == 0)
+            {
+                UnityEngine.Debug.Log(OverrideBossLootScalingEnabled.Value);
+                return;
+            }
+
+            var valid = TryGetBool(args[0]);
+            if (!valid.HasValue)
+                UnityEngine.Debug.Log("Couldn't parse to boolean.");
+            else
+            {
+                OverrideBossLootScalingEnabled.Value = valid.Value;
+                UnityEngine.Debug.Log($"Boss loot scaling disable set to {OverrideBossLootScalingEnabled.Value}.");
+            }
+        }
+
+
         private void GlobalEventManager_OnPlayerCharacterDeath(On.RoR2.GlobalEventManager.orig_OnPlayerCharacterDeath orig, GlobalEventManager self, DamageReport damageReport, NetworkUser victimNetworkUser)
         {
-            if (_config.EnableRefightilization) RemoveMonsterVariantItems(victimNetworkUser.master); // Was player previously a monster variant? Gotta take away those items if the server owner wants that.
+            //if (_config.EnableRefightilization) RemoveMonsterVariantItems(victimNetworkUser.master); // Was player previously a monster variant? Gotta take away those items if the server owner wants that.
             orig(self, damageReport, victimNetworkUser);
             if (!_config.EnableRefightilization) return;
 
@@ -217,7 +292,7 @@ namespace Wonda
             {
                 foreach (PlayerStorage player in playerStorage)
                 {
-                    if (self.isCharged) RemoveMonsterVariantItems(player.master);
+                    //if (self.isCharged) RemoveMonsterVariantItems(player.master);
                     if (self.isCharged) StopCoroutine(RespawnCheck());
                     if (player.master != null && player.master.GetBody() != null && player.master.GetBody().gameObject == activator.gameObject && player.isDead && player.master.teamIndex != TeamIndex.Player && playerStorage.Count > 1) return; 
                     // If there's multiple players, then dead ones won't be able to activate the teleporter.
@@ -536,7 +611,7 @@ namespace Wonda
             Logger.LogInfo("Respawned " + player.playerCharacterMasterController.networkUser.userName + "!");
 
             // Catching Monster Variants if the host has it disabled.
-            if(!_config.RespawnAsMonsterVariants) RemoveMonsterVariantItems(player);
+            //if(!_config.RespawnAsMonsterVariants) RemoveMonsterVariantItems(player);
 
             // Stat changes to allow players to not die instantly when they get into the game.
             player.GetBody().baseMaxHealth *= _config.RespawnHealthMultiplier;
@@ -639,7 +714,7 @@ namespace Wonda
             }
 
             // Refer to the function names.
-            RemoveMonsterVariantItems(player.master);
+            //RemoveMonsterVariantItems(player.master);
             StartCoroutine(GiveScepterWait(player.master, 1f));
 
             // Yay! They're no longer dead!
@@ -840,7 +915,11 @@ namespace Wonda
             }
         }
 
+        /*
         // Code for handling other mods.
+
+        //Fuck these other mods Variants is so out of date i ain't even trying to fix this shit
+
         //
 
         // One-upping myself by having a master function that can call sub-functions.
@@ -851,7 +930,10 @@ namespace Wonda
         }
 
         // Stolen coooode. It takes the AddItems function from MonsterVariants and does everything in reverse... Except it no longer does thaaaat.
+        //should've stolen better code that wasn't out of date
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+       
+        
         private void RemoveMonsterVariantItemsMV(CharacterMaster player)
         {
             if (player != null && player.GetBody() && player.GetBody().GetComponent<MonsterVariants.Components.VariantHandler>() && player.GetBody().GetComponent<MonsterVariants.Components.VariantHandler>().isVariant && _config.RemoveMonsterVariantItems)
@@ -863,7 +945,7 @@ namespace Wonda
                 player.inventory.GiveItem(RoR2Content.Items.HealthDecay, 15); // Ok this part was Nebby's idea.
             }
         }
-
+        */
         // Amazing code provided by Nebby. Thank you so much.
         private void RemoveMonsterVariantItemsAPI(CharacterMaster Player)
         {
@@ -970,6 +1052,16 @@ namespace Wonda
                 player.inventory.GiveItem(AncientScepter.AncientScepterItem.instance.ItemDef);
                 FindPlayerStorage(player).hadAncientScepter = false;
             }*/
+        }
+        private static bool? TryGetBool(string arg)
+        {
+            string[] posStr = { "yes", "true", "1" };
+            string[] negStr = { "no", "false", "0", "-1" };
+
+            if (posStr.Contains(arg.ToLower())) return true;
+            if (negStr.Contains(arg.ToLower())) return false;
+
+            return new bool?();
         }
     }
 }

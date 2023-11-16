@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Multitudes.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="0Harmony">
     </Reference>
     <Reference Include="0Harmony20">
@@ -19,6 +23,9 @@
     <Reference Include="BepInEx.Preloader">
     </Reference>
     <Reference Include="ClassicItems">
+    </Reference>
+    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
+      <HintPath>G:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="HarmonyXInterop">
     </Reference>
@@ -38,8 +45,6 @@
     </Reference>
     <Reference Include="MonoMod.Utils">
     </Reference>
-    <Reference Include="MonsterVariants">
-    </Reference>
     <Reference Include="R2API">
     </Reference>
     <Reference Include="RoR2">
@@ -51,10 +56,6 @@
     <Reference Include="UnityEngine">
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-    </Reference>
-    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
     </Reference>
