@@ -61,12 +61,6 @@ namespace Wonda
             public float lastDamagedTime = 0;
         }
 
-        public static ConfigEntry<bool>
-            OverridePlayerScalingEnabled,
-            OverrideBossLootScalingEnabled,
-            MoneyScalarEnabled;
-        public static ConfigEntry<double> MoneyScalar;
-
         // The actual class to use.
         public List<PlayerStorage> playerStorage = new List<PlayerStorage>();
 
