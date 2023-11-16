@@ -132,73 +132,7 @@ namespace Wonda
             SetupLang(); // For all of our wacky lines we need said.
             moonDisabled = false; // Moonless
         }
-
-        // MoneyScalarEnabled
-        [ConCommand(commandName = "ss_MoneyScalarEnabled", flags = ConVarFlags.None,
-            helpText = "Modifies whether the money scalar is enabled.")]
-        private static void CcMoneyScalarEnabled(ConCommandArgs args)
-        {
-            if (args.Count == 0)
-            {
-                //UnityEngine.Debug.Log();
-                return;
-            }
-
-            var valid = TryGetBool(args[0]);
-            if (!valid.HasValue)
-                UnityEngine.Debug.Log("Couldn't parse to boolean.");
-            else
-            {
-                MoneyScalarEnabled.Value = valid.Value;
-                UnityEngine.Debug.Log($"Money sharing scalar status set to {MoneyScalarEnabled.Value}.");
-            }
-        }
-
-        // MoneyScalar
-        [ConCommand(commandName = "ss_MoneyScalar", flags = ConVarFlags.None,
-            helpText = "Modifies percent of gold earned when money sharing is on.")]
-        private static void CcMoneyScalar(ConCommandArgs args)
-        {
-            if (args.Count == 0)
-            {
-                UnityEngine.Debug.Log(MoneyScalar.Value);
-                return;
-            }
-
-            var valid = args.TryGetArgDouble(0);
-            if (!valid.HasValue)
-            
-            UnityEngine.Debug.Log("Couldn't parse to a number.");
-            else
-            {
-                MoneyScalar.Value = valid.Value;
-                UnityEngine.Debug.Log($"Mod status set to {MoneyScalar.Value}.");
-            }
-        }
-
-
-
-        // DisableBossLootScaling
-        [ConCommand(commandName = "ss_OverrideBossLootScaling", flags = ConVarFlags.None,
-            helpText = "Modifies whether boss loot should scale based on player count.")]
-        private static void CcBossLoot(ConCommandArgs args)
-        {
-            if (args.Count == 0)
-            {
-                UnityEngine.Debug.Log(OverrideBossLootScalingEnabled.Value);
-                return;
-            }
-
-            var valid = TryGetBool(args[0]);
-            if (!valid.HasValue)
-                UnityEngine.Debug.Log("Couldn't parse to boolean.");
-            else
-            {
-                OverrideBossLootScalingEnabled.Value = valid.Value;
-                UnityEngine.Debug.Log($"Boss loot scaling disable set to {OverrideBossLootScalingEnabled.Value}.");
-            }
-        }
-
+        
 
         private void GlobalEventManager_OnPlayerCharacterDeath(On.RoR2.GlobalEventManager.orig_OnPlayerCharacterDeath orig, GlobalEventManager self, DamageReport damageReport, NetworkUser victimNetworkUser)
         {
